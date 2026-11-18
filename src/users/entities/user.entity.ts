@@ -1,1 +1,44 @@
-export class User {}
+import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
+import { Exclude } from 'class-transformer';
+
+export enum UserRole {
+  USER = 'user',
+  ADMIN = 'admin',
+}
+
+@Index(['email'], { unique: true })
+@Entity()
+export class User {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
+  @Column({ unique: true })
+  email: string;
+
+  @Exclude()
+  @Column()
+  password: string;
+
+  @Column({ length: 20 })
+  phoneNumber: string;
+
+  @Column({ type: 'enum', enum: UserRole, default: UserRole.USER })
+  role: UserRole;
+
+  @Column({ default: false })
+  verified: boolean;
+
+  @Exclude()
+  @Column({ nullable: true })
+  verifyToken: string;
+
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  createdAt: Date;
+
+  @Column({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+    onUpdate: 'CURRENT_TIMESTAMP',
+  })
+  updatedAt: Date;
+}
