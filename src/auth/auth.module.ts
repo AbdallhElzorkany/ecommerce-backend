@@ -9,6 +9,7 @@ import { RefreshTokenEntity } from './entities/refresh-token.entity.js';
 import { EmailTokenEntity } from './entities/email-token.entity.js';
 import { AuthenticationStore } from './providers/authentication.store.js';
 import { EmailVerificationMailer } from './providers/email-verification.mailer.js';
+import { PasswordResetMailer } from './providers/password-reset.mailer.js';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { EmailVerificationMailer } from './providers/email-verification.mailer.j
     JwtAuth,
     AuthenticationStore,
     EmailVerificationMailer,
-  ], 
+    PasswordResetMailer,
+  ],
 })
 export class AuthModule {}

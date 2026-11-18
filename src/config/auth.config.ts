@@ -12,6 +12,9 @@ export const AuthOptions: AuthenticationModuleAsyncOptions = {
       emailVerification:{
         url:`${cfg.getOrThrow<string>('APP_URL')}/verify-email`
       },
+      passwordReset:{
+        url:`${cfg.getOrThrow<string>('APP_URL')}/reset-password`
+      }
     };
   },
 };

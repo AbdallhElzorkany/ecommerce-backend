@@ -8,9 +8,14 @@ import { LoginDto } from './dto/login.dto.js';
 import {
   EmailVerificationService,
   PasswordHasher,
+  PasswordResetService,
   TokenService,
 } from '@nestjs/authentication';
 import { UsersService } from '../users/users.service.js';
+import { ResetPasswordDto } from './dto/reset-password.dto.js';
+import { EmailDto } from './dto/email.dto.js';
+import { RefreshTokenDto } from './dto/refresh-token.dto.js';
+import { VerifyEmailDto } from './dto/verify-email.dto.js';
 
 @Injectable()
 export class AuthService {
@@ -19,6 +24,7 @@ export class AuthService {
     private readonly passwordHasher: PasswordHasher,
     private readonly tokenService: TokenService,
     private readonly emailVerificationService: EmailVerificationService,
+    private readonly passwordResetService: PasswordResetService,
   ) {}
 
   /**
@@ -45,13 +51,13 @@ export class AuthService {
    * @param loginDto The login data
    * @returns The user and access token
    */
-  public async login(loginDto: LoginDto) {
-    const user = await this.usersService.findByEmail(loginDto.email);
+  public async login({ email, password }: LoginDto) {
+    const user = await this.usersService.findByEmail(email);
     if (!user) {
       throw new BadRequestException('Email or password is invalid');
     }
     const isPasswordValid = await this.passwordHasher.verify(
-      loginDto.password,
+      password,
       user.password,
     );
     if (!isPasswordValid) {
@@ -64,16 +70,19 @@ export class AuthService {
       );
     }
 
-    const token = await this.tokenService.issue(user.id);
+    const token = await this.tokenService.issue(user.id, {
+      method: 'password',
+      claims: { amr: ['pwd'] },
+    });
     return { user, token };
   }
 
   /**
    * Verify email using token
-   * @param token The verification token
+   * @param verifyEmailDto The verification data
    * @returns Verification result
    */
-  async verifyEmail(token: string) {
+  async verifyEmail({ token }: VerifyEmailDto) {
     const verified = await this.emailVerificationService.verify(token);
     if (!verified) {
       throw new BadRequestException('Invalid or expired link');
@@ -83,21 +92,42 @@ export class AuthService {
 
   /**
    * Refresh the access token
-   * @param refreshToken The refresh token
+   * @param refreshTokenDto The refresh token
    * @returns The new access token
    */
-  public async refresh(refreshToken: string) {
+  public async refresh({ refreshToken }: RefreshTokenDto) {
     const token = await this.tokenService.refresh(refreshToken);
     return token;
   }
 
   /**
    * Revoke the refresh token
-   * @param revokeDto The refresh token
+   * @param refreshTokenDto The refresh token
    * @returns A success message
    */
-  public async revoke(refreshToken: string) {
+  public async revoke({ refreshToken }: RefreshTokenDto) {
     await this.tokenService.revoke(refreshToken);
-    return { message: 'Refresh token revoked successfully' };
+    return { message: 'Refresh token has been revoked successfully' };
+  }
+
+  /**
+   * Request password reset
+   * @param email The email
+   */
+  forgotPassword({ email }: EmailDto) {
+    this.passwordResetService.request(email);
+  }
+
+  /**
+   * Reset password using token
+   * @param resetPasswordDto The reset password data
+   * @returns Reset password result
+   */
+  async resetPassword({ token, password }: ResetPasswordDto) {
+    const updated = await this.passwordResetService.reset(token, password);
+    if (!updated) {
+      throw new BadRequestException('Invalid or expired link');
+    }
+    return { message: 'Password has been reset successfully' };
   }
 }

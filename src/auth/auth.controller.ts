@@ -1,15 +1,26 @@
-import { Controller, Post, Body, HttpCode } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, Get } from '@nestjs/common';
 import { AuthService } from './auth.service.js';
-import { Public } from '@nestjs/authentication';
+import {
+  CurrentUser,
+  PasswordResetService,
+  Public,
+} from '@nestjs/authentication';
 import { RegisterDto } from './dto/register.dto.js';
 import { LoginDto } from './dto/login.dto.js';
 import { RefreshTokenDto } from './dto/refresh-token.dto.js';
 import { VerifyEmailDto } from './dto/verify-email.dto.js';
+import { EmailDto } from './dto/email.dto.js';
+import { ResetPasswordDto } from './dto/reset-password.dto.js';
+import { UserEntity } from '../users/entities/user.entity.js';
+import { ApiSecurity } from '@nestjs/swagger';
 
 @Public()
 @Controller('v1/auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly passwordResetService: PasswordResetService,
+  ) {}
 
   @Post('register')
   async register(@Body() registerDto: RegisterDto) {
@@ -23,17 +34,36 @@ export class AuthController {
 
   @Post('email/verify')
   @HttpCode(200)
-  async verify(@Body() { token }: VerifyEmailDto) {
-    return await this.authService.verifyEmail(token);
+  async verify(@Body() verifyEmailDto: VerifyEmailDto) {
+    return await this.authService.verifyEmail(verifyEmailDto);
   }
 
   @Post('token/refresh')
-  async refresh(@Body() { refreshToken }: RefreshTokenDto) {
-    return await this.authService.refresh(refreshToken);
+  async refresh(@Body() refreshTokenDto: RefreshTokenDto) {
+    return await this.authService.refresh(refreshTokenDto);
   }
 
   @Post('token/revoke')
-  async revoke(@Body() { refreshToken }: RefreshTokenDto) {
-    return await this.authService.revoke(refreshToken);
+  async revoke(@Body() revokeRefreshTokenDto: RefreshTokenDto) {
+    return await this.authService.revoke(revokeRefreshTokenDto);
+  }
+
+  @Post('password/forgot')
+  @HttpCode(202)
+  forgot(@Body() emailDto: EmailDto) {
+    this.authService.forgotPassword(emailDto);
+  }
+
+  @Post('password/reset')
+  @HttpCode(200)
+  async reset(@Body() resetPasswordDto: ResetPasswordDto) {
+    return await this.authService.resetPassword(resetPasswordDto);
+  }
+
+  @ApiSecurity('bearer')
+  @Get('me')
+  me(@CurrentUser() user: UserEntity) {
+    console.log(user);
+    return user;
   }
 }
