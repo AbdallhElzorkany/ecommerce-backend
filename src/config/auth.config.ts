@@ -9,6 +9,9 @@ export const AuthOptions: AuthenticationModuleAsyncOptions = {
         key: cfg.getOrThrow<string>('JWT_SECRET'),
         ttl: cfg.getOrThrow<Duration>('JWT_EXPIRATION'),
       },
+      emailVerification:{
+        url:`${cfg.getOrThrow<string>('APP_URL')}/verify-email`
+      },
     };
   },
 };

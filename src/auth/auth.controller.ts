@@ -1,8 +1,10 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode } from '@nestjs/common';
 import { AuthService } from './auth.service.js';
 import { Public } from '@nestjs/authentication';
 import { RegisterDto } from './dto/register.dto.js';
 import { LoginDto } from './dto/login.dto.js';
+import { RefreshTokenDto } from './dto/refresh-token.dto.js';
+import { VerifyEmailDto } from './dto/verify-email.dto.js';
 
 @Public()
 @Controller('v1/auth')
@@ -19,13 +21,19 @@ export class AuthController {
     return await this.authService.login(loginDto);
   }
 
+  @Post('email/verify')
+  @HttpCode(200)
+  async verify(@Body() { token }: VerifyEmailDto) {
+    return await this.authService.verifyEmail(token);
+  }
+
   @Post('token/refresh')
-  async refresh(@Body() refreshDto: { refreshToken: string }) {
-    return await this.authService.refresh(refreshDto);
+  async refresh(@Body() { refreshToken }: RefreshTokenDto) {
+    return await this.authService.refresh(refreshToken);
   }
 
   @Post('token/revoke')
-  async revoke(@Body() revokeDto: { refreshToken: string }) {
-    return await this.authService.revoke(revokeDto);
+  async revoke(@Body() { refreshToken }: RefreshTokenDto) {
+    return await this.authService.revoke(refreshToken);
   }
 }

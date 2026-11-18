@@ -29,11 +29,7 @@ export class UserEntity {
   role: UserRole;
 
   @Column({ default: false })
-  verified: boolean;
-
-  @Exclude()
-  @Column({ nullable: true })
-  verifyToken: string;
+  emailVerified: boolean;
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;

@@ -8,10 +8,23 @@ import { UsersModule } from '../users/users.module.js';
 import { RefreshTokenEntity } from './entities/refresh-token.entity.js';
 import { EmailTokenEntity } from './entities/email-token.entity.js';
 import { AuthenticationStore } from './providers/authentication.store.js';
+import { EmailVerificationMailer } from './providers/email-verification.mailer.js';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([UserEntity, RefreshTokenEntity, EmailTokenEntity]), UsersModule],
+  imports: [
+    TypeOrmModule.forFeature([
+      UserEntity,
+      RefreshTokenEntity,
+      EmailTokenEntity,
+    ]),
+    UsersModule,
+  ],
   controllers: [AuthController],
-  providers: [AuthService, JwtAuth,AuthenticationStore],
+  providers: [
+    AuthService,
+    JwtAuth,
+    AuthenticationStore,
+    EmailVerificationMailer,
+  ], 
 })
 export class AuthModule {}
