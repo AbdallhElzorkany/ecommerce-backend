@@ -10,22 +10,22 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('register')
-  register(@Body() registerDto: RegisterDto) {
-    return this.authService.register(registerDto);
+  async register(@Body() registerDto: RegisterDto) {
+    return await this.authService.register(registerDto);
   }
 
   @Post('login')
-  login(@Body() loginDto: LoginDto) {
-    return this.authService.login(loginDto);
+  async login(@Body() loginDto: LoginDto) {
+    return await this.authService.login(loginDto);
   }
 
-  @Post('refresh')
-  refresh(@Body() refreshDto: { refreshToken: string }) {
-    return this.authService.refresh(refreshDto);
+  @Post('token/refresh')
+  async refresh(@Body() refreshDto: { refreshToken: string }) {
+    return await this.authService.refresh(refreshDto);
   }
 
-  @Post('logout')
-  logout(@Body() logoutDto: { refreshToken: string }) {
-    return this.authService.logout(logoutDto);
+  @Post('token/revoke')
+  async revoke(@Body() revokeDto: { refreshToken: string }) {
+    return await this.authService.revoke(revokeDto);
   }
 }

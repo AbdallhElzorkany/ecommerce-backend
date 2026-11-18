@@ -1,6 +1,9 @@
 import { TypeOrmModuleAsyncOptions } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
-import { User } from '../../users/entities/user.entity.js';
+import { UserEntity } from '../../users/entities/user.entity.js';
+import { RefreshTokenEntity } from '../../auth/entities/refresh-token.entity.js';
+import { EmailTokenEntity } from '../../auth/entities/email-token.entity.js';
+
 export const dbOptions: TypeOrmModuleAsyncOptions = {
   inject: [ConfigService],
   useFactory(config: ConfigService) {
@@ -8,7 +11,7 @@ export const dbOptions: TypeOrmModuleAsyncOptions = {
     return {
       type: 'postgres',
       url: dbURL,
-      entities: [User],
+      entities: [UserEntity, RefreshTokenEntity, EmailTokenEntity],
       synchronize: true,
     };
   },

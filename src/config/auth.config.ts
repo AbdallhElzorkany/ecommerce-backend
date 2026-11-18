@@ -9,9 +9,6 @@ export const AuthOptions: AuthenticationModuleAsyncOptions = {
         key: cfg.getOrThrow<string>('JWT_SECRET'),
         ttl: cfg.getOrThrow<Duration>('JWT_EXPIRATION'),
       },
-      password:{
-        saltLength: cfg.getOrThrow<number>('PASSWORD_SALT')
-      }
     };
   },
 };

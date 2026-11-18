@@ -16,7 +16,7 @@ import { RefundsModule } from './refunds/refunds.module.js';
 import { CheckoutModule } from './checkout/checkout.module.js';
 import { PaymentsModule } from './payments/payments.module.js';
 import { InventoryModule } from './inventory/inventory.module.js';
-import { dbOptions } from './config/db/config.js';
+import { dbOptions } from './config/db/db.config.js';
 import { AuthOptions } from './config/auth.config.js';
 @Module({
   imports: [

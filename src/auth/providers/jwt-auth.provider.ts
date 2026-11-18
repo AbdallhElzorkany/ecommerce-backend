@@ -6,12 +6,12 @@ import {
   JwtBearerProvider,
   type JwtClaims,
 } from '@nestjs/authentication';
-import { User } from '../../users/entities/user.entity.js';
+import { UserEntity } from '../../users/entities/user.entity.js';
 
 @Injectable()
-export class JwtAuth extends JwtBearerProvider<User> {
+export class JwtAuth extends JwtBearerProvider<UserEntity> {
   constructor(
-    @InjectRepository(User) private readonly usersRepository: Repository<User>,
+    @InjectRepository(UserEntity) private readonly usersRepository: Repository<UserEntity>,
     registry: AuthenticationRegistry,
   ) {
     // The key, issuer and audience come from the `accessToken` options.

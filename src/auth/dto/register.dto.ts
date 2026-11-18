@@ -17,6 +17,11 @@ export class RegisterDto {
   @IsString()
   email: string;
 
+  @ApiProperty({ description: 'User fullname' })
+  @IsNotEmpty()
+  @IsString()
+  fullname: string;
+
   @ApiProperty({ description: 'User password' })
   @IsStrongPassword(
     {
