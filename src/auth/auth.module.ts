@@ -10,6 +10,8 @@ import { EmailTokenEntity } from './entities/email-token.entity.js';
 import { AuthenticationStore } from './providers/authentication.store.js';
 import { EmailVerificationMailer } from './providers/email-verification.mailer.js';
 import { PasswordResetMailer } from './providers/password-reset.mailer.js';
+import { ConfigService } from '@nestjs/config';
+import { JwtVerifier } from '@nestjs/authentication';
 
 @Module({
   imports: [
@@ -27,6 +29,12 @@ import { PasswordResetMailer } from './providers/password-reset.mailer.js';
     AuthenticationStore,
     EmailVerificationMailer,
     PasswordResetMailer,
+    {
+      provide: JwtVerifier,
+      inject: [ConfigService],
+      useFactory: (cfg: ConfigService) =>
+        new JwtVerifier({ key: cfg.getOrThrow<string>('JWT_SECRET') }),
+    },
   ],
 })
 export class AuthModule {}

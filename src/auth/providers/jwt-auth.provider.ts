@@ -16,13 +16,19 @@ export class JwtAuth extends JwtBearerProvider<UserEntity> {
   ) {
     // The key, issuer and audience come from the `accessToken` options.
     super({ realm: 'store' });
-    // Second in the chain, after SessionAuth (order 0).
     registry.registerProvider(this);
   }
 
   // Called after the signature and claims checked out.
   // Returning null (the user was deleted) rejects the token.
-  validate({ sub }: JwtClaims) {
-    return sub ? this.usersRepository.findOneBy({ id: sub }) : null;
+  async validate({ sub }: JwtClaims) {
+    if (!sub) {
+      return null;
+    }
+    const user = await this.usersRepository.findOneBy({ id: sub });
+    if (!user || !user.isActive) {
+      return null;
+    }
+    return user;
   }
 }

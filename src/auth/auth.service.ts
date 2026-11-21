@@ -1,21 +1,23 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { RegisterDto } from './dto/register.dto.js';
-import { LoginDto } from './dto/login.dto.js';
 import {
   EmailVerificationService,
   PasswordHasher,
   PasswordResetService,
   TokenService,
+  JwtVerifier,
 } from '@nestjs/authentication';
 import { UsersService } from '../users/users.service.js';
-import { ResetPasswordDto } from './dto/reset-password.dto.js';
-import { EmailDto } from './dto/email.dto.js';
-import { RefreshTokenDto } from './dto/refresh-token.dto.js';
+import { RegisterDto } from './dto/register.dto.js';
+import { LoginDto } from './dto/login.dto.js';
 import { VerifyEmailDto } from './dto/verify-email.dto.js';
+import { EmailDto } from './dto/email.dto.js';
+import { ResetPasswordDto } from './dto/reset-password.dto.js';
+import { RefreshTokenDto } from './dto/refresh-token.dto.js';
 
 @Injectable()
 export class AuthService {
@@ -25,6 +27,7 @@ export class AuthService {
     private readonly tokenService: TokenService,
     private readonly emailVerificationService: EmailVerificationService,
     private readonly passwordResetService: PasswordResetService,
+    private readonly jwtVerifier: JwtVerifier,
   ) {}
 
   /**
@@ -69,6 +72,11 @@ export class AuthService {
         'Email is not verified yet. Please check your email for verification link.',
       );
     }
+    if (!user.isActive) {
+      throw new ForbiddenException(
+        'Account is not active. Please contact support for assistance.',
+      );
+    }
 
     const token = await this.tokenService.issue(user.id, {
       method: 'password',
@@ -97,6 +105,14 @@ export class AuthService {
    */
   public async refresh({ refreshToken }: RefreshTokenDto) {
     const token = await this.tokenService.refresh(refreshToken);
+    const payload = await this.jwtVerifier.verify(token.accessToken);
+    const user = await this.usersService.find(payload.sub as string);
+    if (!user.isActive) {
+      await this.tokenService.revokeAll(user.id);
+      throw new UnauthorizedException(
+        'Account is not active. Please contact support for assistance.',
+      );
+    }
     return token;
   }
 
@@ -116,6 +132,7 @@ export class AuthService {
    */
   forgotPassword({ email }: EmailDto) {
     this.passwordResetService.request(email);
+    return { message: 'Password reset link has been sent to your email' };
   }
 
   /**

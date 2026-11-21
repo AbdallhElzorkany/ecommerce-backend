@@ -53,17 +53,13 @@ export class UsersController {
 
   @Can(UsersPolicy, 'activate')
   @Patch(':id/activate')
-  activate(@CurrentUser() user: UserEntity, @Param('id') id: string) {
-    return this.usersService.activate(user, id);
+  activate(@Param('id') id: string) {
+    return this.usersService.activate(id);
   }
 
   @Can(UsersPolicy, 'changeRole')
   @Patch(':id/change-role')
-  changeRole(
-    @CurrentUser() user: UserEntity,
-    @Param('id') id: string,
-    @Body() { role }: ChangeRoleDto,
-  ) {
-    return this.usersService.changeRole(user, id, role);
+  changeRole(@Param('id') id: string, @Body() { role }: ChangeRoleDto) {
+    return this.usersService.changeRole(id, role);
   }
 }

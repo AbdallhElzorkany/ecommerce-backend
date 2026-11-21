@@ -10,10 +10,7 @@ import {
 import {
   DataSource,
   IsNull,
-  LessThan,
   LessThanOrEqual,
-  MoreThan,
-  Or,
   type EntityTarget,
   type FindOptionsWhere,
   type ObjectLiteral,

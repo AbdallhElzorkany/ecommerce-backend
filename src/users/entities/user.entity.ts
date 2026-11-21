@@ -7,7 +7,6 @@ export enum UserRole {
   ADMIN = 'admin',
 }
 
-@Index(['email'], { unique: true })
 @Entity('users')
 export class UserEntity {
   @PrimaryGeneratedColumn('uuid')

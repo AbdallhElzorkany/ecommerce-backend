@@ -1,9 +1,6 @@
-import { UserRole } from '../../users/entities/user.entity.js';
 import {
   IsEmail,
-  IsEnum,
   IsNotEmpty,
-  IsOptional,
   IsPhoneNumber,
   IsString,
   IsStrongPassword,

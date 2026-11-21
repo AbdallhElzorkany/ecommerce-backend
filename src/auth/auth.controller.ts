@@ -1,10 +1,13 @@
-import { Controller, Post, Body, HttpCode, Get, UseGuards } from '@nestjs/common';
-import { AuthService } from './auth.service.js';
 import {
-  CurrentUser,
-  Public,
-  Authenticate,
-} from '@nestjs/authentication';
+  Controller,
+  Post,
+  Body,
+  HttpCode,
+  Get,
+  UseGuards,
+} from '@nestjs/common';
+import { AuthService } from './auth.service.js';
+import { CurrentUser, Public, Authenticate } from '@nestjs/authentication';
 import { RegisterDto } from './dto/register.dto.js';
 import { LoginDto } from './dto/login.dto.js';
 import { RefreshTokenDto } from './dto/refresh-token.dto.js';
@@ -47,9 +50,8 @@ export class AuthController {
   }
 
   @Post('password/forgot')
-  @HttpCode(202)
   forgot(@Body() emailDto: EmailDto) {
-    this.authService.forgotPassword(emailDto);
+    return this.authService.forgotPassword(emailDto);
   }
 
   @Post('password/reset')
@@ -63,7 +65,6 @@ export class AuthController {
   @ApiSecurity('bearer')
   @Get('me')
   me(@CurrentUser() user: UserEntity) {
-    console.log(user);
     return user;
   }
 }
