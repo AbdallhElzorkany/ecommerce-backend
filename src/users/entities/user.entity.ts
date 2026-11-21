@@ -3,6 +3,7 @@ import { Exclude } from 'class-transformer';
 
 export enum UserRole {
   USER = 'user',
+  STAFF = 'staff',
   ADMIN = 'admin',
 }
 
@@ -30,6 +31,9 @@ export class UserEntity {
 
   @Column({ default: false })
   emailVerified: boolean;
+
+  @Column({ default: true })
+  isActive: boolean;
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;

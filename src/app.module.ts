@@ -17,14 +17,14 @@ import { CheckoutModule } from './checkout/checkout.module.js';
 import { PaymentsModule } from './payments/payments.module.js';
 import { InventoryModule } from './inventory/inventory.module.js';
 import { dbOptions } from './config/db/db.config.js';
-import { AuthOptions } from './config/auth.config.js';
+import { AuthOptions, authorizationModuleOptions } from './config/auth.config.js';
 import { MailModule } from '@nestjs/mail';
 import { MailOptions } from './config/mail.config.js';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     AuthenticationModule.forRootAsync(AuthOptions),
-    AuthorizationModule.forRoot(),
+    AuthorizationModule.forRoot(authorizationModuleOptions),
     TypeOrmModule.forRootAsync(dbOptions),
     MailModule.forRootAsync(MailOptions),
     ThrottlerModule.forRoot([

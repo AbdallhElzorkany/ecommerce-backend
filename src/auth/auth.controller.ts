@@ -1,9 +1,9 @@
-import { Controller, Post, Body, HttpCode, Get } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, Get, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service.js';
 import {
   CurrentUser,
-  PasswordResetService,
   Public,
+  Authenticate,
 } from '@nestjs/authentication';
 import { RegisterDto } from './dto/register.dto.js';
 import { LoginDto } from './dto/login.dto.js';
@@ -13,14 +13,12 @@ import { EmailDto } from './dto/email.dto.js';
 import { ResetPasswordDto } from './dto/reset-password.dto.js';
 import { UserEntity } from '../users/entities/user.entity.js';
 import { ApiSecurity } from '@nestjs/swagger';
+import { Can } from '@nestjs/authorization';
 
 @Public()
 @Controller('v1/auth')
 export class AuthController {
-  constructor(
-    private readonly authService: AuthService,
-    private readonly passwordResetService: PasswordResetService,
-  ) {}
+  constructor(private readonly authService: AuthService) {}
 
   @Post('register')
   async register(@Body() registerDto: RegisterDto) {
@@ -60,6 +58,8 @@ export class AuthController {
     return await this.authService.resetPassword(resetPasswordDto);
   }
 
+  @Can.Anyone()
+  @Authenticate()
   @ApiSecurity('bearer')
   @Get('me')
   me(@CurrentUser() user: UserEntity) {

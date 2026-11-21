@@ -25,8 +25,8 @@ import {
 import { EmailTokenEntity } from '../entities/email-token.entity.js';
 /**
  * Keeps refresh tokens, email tokens in
- * PostgreSQL, through TypeORM on the same
- * tables. Every method that decides whether something works once is a
+ * PostgreSQL, through TypeORM.
+ * Every method that decides whether something works once is a
  * single conditional statement, so the guarantees hold with any number of
  * API instances.
  */
