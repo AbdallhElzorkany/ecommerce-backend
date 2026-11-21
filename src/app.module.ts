@@ -4,26 +4,20 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { AuthenticationModule } from '@nestjs/authentication';
 import { AuthorizationModule } from '@nestjs/authorization';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { ProductsModule } from './products/products.module.js';
+import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module.js';
 import { UsersModule } from './users/users.module.js';
-import { CategoriesModule } from './categories/categories.module.js';
-import { AddressesModule } from './addresses/addresses.module.js';
-import { OrdersModule } from './orders/orders.module.js';
-import { CartsModule } from './carts/carts.module.js';
-import { RefundsModule } from './refunds/refunds.module.js';
-import { CheckoutModule } from './checkout/checkout.module.js';
-import { PaymentsModule } from './payments/payments.module.js';
-import { InventoryModule } from './inventory/inventory.module.js';
 import { dbOptions } from './config/db/db.config.js';
-import { AuthOptions, authorizationModuleOptions } from './config/auth.config.js';
+import {
+  AuthenticationModuleOptions,
+  authorizationModuleOptions,
+} from './config/auth.config.js';
 import { MailModule } from '@nestjs/mail';
 import { MailOptions } from './config/mail.config.js';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-    AuthenticationModule.forRootAsync(AuthOptions),
+    AuthenticationModule.forRootAsync(AuthenticationModuleOptions),
     AuthorizationModule.forRoot(authorizationModuleOptions),
     TypeOrmModule.forRootAsync(dbOptions),
     MailModule.forRootAsync(MailOptions),
@@ -34,16 +28,7 @@ import { MailOptions } from './config/mail.config.js';
       },
     ]),
     UsersModule,
-    ProductsModule,
     AuthModule,
-    CategoriesModule,
-    AddressesModule,
-    OrdersModule,
-    CartsModule,
-    RefundsModule,
-    CheckoutModule,
-    PaymentsModule,
-    InventoryModule,
   ],
   controllers: [],
   providers: [

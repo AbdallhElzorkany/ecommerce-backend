@@ -2,11 +2,11 @@ import {
   AuthenticationModuleAsyncOptions,
   type Duration,
 } from '@nestjs/authentication';
-import { AuthorizationModuleAsyncOptions, AuthorizationModuleOptions } from '@nestjs/authorization';
+import { AuthorizationModuleAsyncOptions } from '@nestjs/authorization';
 import { ConfigService } from '@nestjs/config';
 import { UsersPolicy } from '../users/users.policy.js';
 
-export const AuthOptions: AuthenticationModuleAsyncOptions = {
+export const AuthenticationModuleOptions: AuthenticationModuleAsyncOptions = {
   inject: [ConfigService],
   useFactory: (cfg: ConfigService) => {
     return {
@@ -26,5 +26,5 @@ export const AuthOptions: AuthenticationModuleAsyncOptions = {
 };
 
 export const authorizationModuleOptions: AuthorizationModuleAsyncOptions = {
-  policies: [UsersPolicy]
+  policies: [UsersPolicy],
 };
