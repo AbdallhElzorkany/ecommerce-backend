@@ -8,20 +8,20 @@ export class UsersPolicy implements PolicyBefore<UserEntity> {
     }
   }
 
-  view(CurrentUser: UserEntity | null, user: UserEntity) {
-    return CurrentUser?.id === user.id || CurrentUser?.role === UserRole.STAFF;
+  view(currentUser: UserEntity | null, user: UserEntity) {
+    return currentUser?.id === user.id || currentUser?.role === UserRole.STAFF;
   }
 
   viewAll(user: UserEntity | null) {
     return user?.role === UserRole.STAFF;
   }
 
-  update(CurrentUser: UserEntity | null, user: UserEntity) {
-    return CurrentUser?.id === user.id;
+  update(currentUser: UserEntity | null, user: UserEntity) {
+    return currentUser?.id === user.id;
   }
 
-  deactivate(CurrentUser: UserEntity | null, user: UserEntity) {
-    return CurrentUser?.id === user.id;
+  deactivate(currentUser: UserEntity | null, user: UserEntity) {
+    return currentUser?.id === user.id;
   }
 
   activate(_user: UserEntity | null) {

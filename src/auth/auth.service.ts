@@ -82,7 +82,7 @@ export class AuthService {
       method: 'password',
       claims: { amr: ['pwd'] },
     });
-    return { user, token };
+    return { user, tokens: token };
   }
 
   /**

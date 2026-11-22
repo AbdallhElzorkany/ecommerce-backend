@@ -14,6 +14,7 @@ import {
 } from './config/auth.config.js';
 import { MailModule } from '@nestjs/mail';
 import { MailOptions } from './config/mail.config.js';
+import { CategoriesModule } from './categories/categories.module.js';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -27,8 +28,9 @@ import { MailOptions } from './config/mail.config.js';
         limit: 60,
       },
     ]),
-    UsersModule,
     AuthModule,
+    UsersModule,
+    CategoriesModule,
   ],
   controllers: [],
   providers: [

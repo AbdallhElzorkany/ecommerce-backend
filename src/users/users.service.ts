@@ -65,9 +65,9 @@ export class UsersService {
         [sortBy]: sortOrder,
       },
       where: {
-        fullname: search ? ILike(`%${search}%`) : undefined,
-        role: role ? role : undefined,
-        isActive: isActive !== undefined ? isActive : undefined,
+        ...(search ? { fullname: ILike(`%${search}%`) } : {}),
+        ...(role ? { role } : {}),
+        ...(isActive !== undefined ? { isActive } : {}),
       },
     };
     const users = await this.userRepository.find(options);
@@ -109,7 +109,7 @@ export class UsersService {
     user: UserEntity,
     id: string,
     updateUserDto: UpdateUserDto,
-  ) {
+  ): Promise<UserEntity> {
     const foundUser = await this.find(id);
     const isAllowed = await this.authorizationService.can(
       UsersPolicy,
