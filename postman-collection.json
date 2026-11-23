@@ -169,6 +169,14 @@
           }
         },
         {
+          "name": "Get Category By Slug",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/categories/slug/:slug", "host": ["{{base_url}}"], "path": ["categories", "slug", ":slug"] },
+            "description": "Public. Returns the category matching the slug."
+          }
+        },
+        {
           "name": "Get Category",
           "request": {
             "method": "GET",
@@ -192,6 +200,78 @@
           "request": {
             "method": "DELETE",
             "url": { "raw": "{{base_url}}/categories/:id", "host": ["{{base_url}}"], "path": ["categories", ":id"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Products",
+      "item": [
+        {
+          "name": "Create Product (admin)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/products", "host": ["{{base_url}}"], "path": ["products"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Wireless Mouse\",\n  \"slug\": \"wireless-mouse\",\n  \"description\": \"Ergonomic wireless mouse with USB receiver\",\n  \"price\": 29.99,\n  \"stock\": 100,\n  \"categoryId\": \"<category-id>\"\n}"
+            },
+            "description": "Requires admin permission. name 3-255 chars, description 3-1000, price >= 0, stock integer >= 0."
+          }
+        },
+        {
+          "name": "List Products",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/products?search=&categoryId=&sortBy=name&sortOrder=ASC&page=1&limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["products"],
+              "query": [
+                { "key": "search", "value": "", "description": "Search by name" },
+                { "key": "categoryId", "value": "", "description": "Filter by category ID" },
+                { "key": "sortBy", "value": "name", "description": "name | price | stock | createdAt | updatedAt" },
+                { "key": "sortOrder", "value": "ASC", "description": "ASC | DESC" },
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10", "description": "1-100" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Product By Slug",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/products/slug/:slug", "host": ["{{base_url}}"], "path": ["products", "slug", ":slug"] },
+            "description": "Public. Returns the product matching the slug."
+          }
+        },
+        {
+          "name": "Get Product",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/products/:id", "host": ["{{base_url}}"], "path": ["products", ":id"] }
+          }
+        },
+        {
+          "name": "Update Product (admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/products/:id", "host": ["{{base_url}}"], "path": ["products", ":id"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Wireless Mouse Pro\",\n  \"price\": 34.99,\n  \"stock\": 80\n}"
+            },
+            "description": "All fields optional."
+          }
+        },
+        {
+          "name": "Delete Product (admin)",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{base_url}}/products/:id", "host": ["{{base_url}}"], "path": ["products", ":id"] }
           }
         }
       ]

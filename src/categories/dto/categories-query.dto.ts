@@ -29,7 +29,7 @@ export class CategoriesQueryDto {
     required: false,
     enum: ['ASC', 'DESC'],
     description: 'Sort order',
-    default: 'DESC',
+    default: 'ASC',
   })
   @IsOptional()
   @IsString()

@@ -109,7 +109,7 @@ export class UsersService {
     user: UserEntity,
     id: string,
     updateUserDto: UpdateUserDto,
-  ): Promise<UserEntity> {
+  ) {
     const foundUser = await this.find(id);
     const isAllowed = await this.authorizationService.can(
       UsersPolicy,
@@ -120,7 +120,7 @@ export class UsersService {
     if (!isAllowed) {
       throw new ForbiddenException();
     }
-    const updatedUser = await this.userRepository.save({
+    const { password, ...updatedUser } = await this.userRepository.save({
       ...foundUser,
       fullname: updateUserDto.fullname ?? foundUser.fullname,
       phoneNumber: updateUserDto.phoneNumber ?? foundUser.phoneNumber,

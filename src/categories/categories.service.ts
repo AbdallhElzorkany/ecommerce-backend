@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateCategoryDto } from './dto/create-category.dto.js';
 import { UpdateCategoryDto } from './dto/update-category.dto.js';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -10,7 +10,7 @@ import { CategoriesQueryDto } from './dto/categories-query.dto.js';
 export class CategoriesService {
   constructor(
     @InjectRepository(CategoryEntity)
-    private readonly categoryRepository: Repository<CategoryEntity>,
+    private readonly categoriesRepository: Repository<CategoryEntity>,
   ) {}
   /**
    * Creates a new category
@@ -19,8 +19,8 @@ export class CategoriesService {
    */
   public async create(createCategoryDto: CreateCategoryDto) {
     try {
-      const category = this.categoryRepository.create(createCategoryDto);
-      return await this.categoryRepository.save(category);
+      const category = this.categoriesRepository.create(createCategoryDto);
+      return await this.categoriesRepository.save(category);
     } catch (error) {
       if (
         error instanceof QueryFailedError &&
@@ -57,8 +57,8 @@ export class CategoriesService {
       skip: (page - 1) * limit,
       take: limit,
     };
-    const categories = await this.categoryRepository.find(options);
-    const total = await this.categoryRepository.count({
+    const categories = await this.categoriesRepository.find(options);
+    const total = await this.categoriesRepository.count({
       where: options.where,
     });
     return {
@@ -76,7 +76,7 @@ export class CategoriesService {
    * @throws NotFoundException if the category is not found
    */
   public async findOne(id: string) {
-    const category = await this.categoryRepository.findOneBy({ id });
+    const category = await this.categoriesRepository.findOneBy({ id });
     if (!category) {
       throw new NotFoundException('Category not found');
     }
@@ -95,7 +95,7 @@ export class CategoriesService {
     const category = await this.findOne(id);
 
     try {
-      const updatedCategory = await this.categoryRepository.save({
+      const updatedCategory = await this.categoriesRepository.save({
         ...category,
         name: updateCategoryDto.name ?? category.name,
         description: updateCategoryDto.description ?? category.description,
@@ -122,15 +122,22 @@ export class CategoriesService {
    */
   public async remove(id: string) {
     const category = await this.findOne(id);
-    const result = await this.categoryRepository.remove(category);
-    if (!result) {
-      throw new InternalServerErrorException('Failed to delete category');
+    try {
+      const result = await this.categoriesRepository.remove(category);
+      return result;
+    } catch (error) {
+      if (
+        error instanceof QueryFailedError &&
+        (error as any).code === '23503' // foreign_key_violation
+      ) {
+        throw new BadRequestException('Cannot delete category with products');
+      }
+      throw error;
     }
-    return result;
   }
 
   public async findBySlug(slug: string) {
-    const category = await this.categoryRepository.findOneBy({ slug });
+    const category = await this.categoriesRepository.findOneBy({ slug });
     if (!category) {
       throw new NotFoundException('Category not found');
     }
