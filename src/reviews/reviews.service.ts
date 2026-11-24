@@ -31,17 +31,25 @@ export class ReviewsService {
   public async create(user: UserEntity, createReviewDto: CreateReviewDto) {
     const { productId, ...reviewDto } = createReviewDto;
     const product = await this.productsService.findOne(productId);
-    const existingReview = await this.findByUserOnProduct(user.id, productId);
-    if (existingReview) {
-      throw new ConflictException('You have already reviewed this product');
+    try {
+      const review = this.reviewsRepository.create({
+        ...reviewDto,
+        product,
+        user,
+      });
+      const { product: _, ...savedReview } =
+        await this.reviewsRepository.save(review);
+      await this.recalculateRating(productId);
+      return savedReview;
+    } catch (error) {
+      if (
+        error instanceof QueryFailedError &&
+        (error as any).code === '23505' // unique_violation
+      ) {
+        throw new ConflictException('You have already reviewed this product');
+      }
+      throw error;
     }
-
-    const review = this.reviewsRepository.create({
-      ...reviewDto,
-      product,
-      user,
-    });
-    return await this.reviewsRepository.save(review);
   }
 
   /**
@@ -72,7 +80,6 @@ export class ReviewsService {
     const reviews = await this.reviewsRepository.find(options);
     const total = await this.reviewsRepository.count({
       where: options.where,
-      relations: { user: true },
     });
     return {
       total,
@@ -121,11 +128,12 @@ export class ReviewsService {
       user,
       review,
     );
-    const updatedReview = await this.reviewsRepository.save({
+    const { product, ...updatedReview } = await this.reviewsRepository.save({
       ...review,
       comment: comment ?? review.comment,
       rating: rating ?? review.rating,
     });
+    if (rating !== undefined) await this.recalculateRating(product.id);
     return updatedReview;
   }
 
@@ -144,14 +152,26 @@ export class ReviewsService {
       user,
       review,
     );
-    const result = await this.reviewsRepository.remove(review);
+    const { product, ...result } = await this.reviewsRepository.remove(review);
+    await this.recalculateRating(product.id);
     return result;
   }
 
-  public async findByUserOnProduct(userId: string, productId: string) {
-    const review = await this.reviewsRepository.findOne({
-      where: { user: { id: userId }, product: { id: productId } },
+  /**
+   * Recalculates the average rating for a product
+   * @param productId The ID of the product to recalculate the rating for
+   */
+  private async recalculateRating(productId: string) {
+    const { avg, count } = await this.reviewsRepository
+      .createQueryBuilder('r')
+      .select('AVG(r.rating)', 'avg')
+      .addSelect('COUNT(*)', 'count')
+      .where('r.productId = :productId', { productId })
+      .getRawOne();
+
+    await this.productsService.updateRating(productId, {
+      rating: Number(avg) || 0,
+      reviewCount: Number(count),
     });
-    return review;
   }
 }

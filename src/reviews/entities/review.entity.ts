@@ -5,12 +5,14 @@ import {
   Entity,
   ManyToOne,
   PrimaryGeneratedColumn,
+  Unique,
   UpdateDateColumn,
   type Relation,
 } from 'typeorm';
 import { UserEntity } from '../../users/entities/user.entity.js';
 import { ProductEntity } from '../../products/entities/product.entity.js';
 
+@Unique(['user', 'product'])
 @Entity('reviews')
 export class ReviewEntity {
   @PrimaryGeneratedColumn('uuid')

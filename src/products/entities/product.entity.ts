@@ -30,6 +30,12 @@ export class ProductEntity {
   @Column({ type: 'double precision' })
   price: number;
 
+  @Column({ type: 'double precision', default: 0 })
+  rating: number;
+
+  @Column({ type: 'integer', default: 0 })
+  reviewCount: number;
+
   @Check('stock >= 0')
   @Column({ type: 'integer', default: 0 })
   stock: number;
