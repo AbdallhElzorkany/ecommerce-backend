@@ -6,6 +6,7 @@ import {
   Param,
   Delete,
   Query,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { UsersService } from './users.service.js';
 import { UpdateUserDto } from './dto/update-user.dto.js';
@@ -31,7 +32,10 @@ export class UsersController {
 
   @Can.Anyone()
   @Get(':id')
-  findOne(@CurrentUser() user: UserEntity, @Param('id') id: string) {
+  findOne(
+    @CurrentUser() user: UserEntity,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
     return this.usersService.findOne(user, id);
   }
 
@@ -39,7 +43,7 @@ export class UsersController {
   @Patch(':id')
   update(
     @CurrentUser() user: UserEntity,
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() updateUserDto: UpdateUserDto,
   ) {
     return this.usersService.update(user, id, updateUserDto);
@@ -47,19 +51,25 @@ export class UsersController {
 
   @Can.Anyone()
   @Delete(':id')
-  deactivate(@CurrentUser() user: UserEntity, @Param('id') id: string) {
+  deactivate(
+    @CurrentUser() user: UserEntity,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
     return this.usersService.remove(user, id);
   }
 
   @Can(UsersPolicy, 'activate')
   @Patch(':id/activate')
-  activate(@Param('id') id: string) {
+  activate(@Param('id', ParseUUIDPipe) id: string) {
     return this.usersService.activate(id);
   }
 
   @Can(UsersPolicy, 'changeRole')
   @Patch(':id/change-role')
-  changeRole(@Param('id') id: string, @Body() { role }: ChangeRoleDto) {
+  changeRole(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() { role }: ChangeRoleDto,
+  ) {
     return this.usersService.changeRole(id, role);
   }
 }

@@ -347,6 +347,71 @@
           }
         }
       ]
+    },
+    {
+      "name": "Reviews",
+      "item": [
+        {
+          "name": "Create Review",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/reviews", "host": ["{{base_url}}"], "path": ["reviews"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rating\": 5,\n  \"comment\": \"This is a great product!\",\n  \"productId\": \"<product-id>\"\n}"
+            },
+            "description": "Requires Bearer token. rating 1-5, comment 1-1000 chars. One review per user per product (409 on duplicate)."
+          }
+        },
+        {
+          "name": "List Reviews",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/reviews?productId=&userId=&sortBy=createdAt&sortOrder=DESC&page=1&limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["reviews"],
+              "query": [
+                { "key": "productId", "value": "", "description": "Filter by product ID" },
+                { "key": "userId", "value": "", "description": "Filter by user ID" },
+                { "key": "sortBy", "value": "createdAt", "description": "rating | createdAt | updatedAt" },
+                { "key": "sortOrder", "value": "DESC", "description": "ASC | DESC" },
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10", "description": "1-100" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Review",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/reviews/:id", "host": ["{{base_url}}"], "path": ["reviews", ":id"] }
+          }
+        },
+        {
+          "name": "Update Review",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/reviews/:id", "host": ["{{base_url}}"], "path": ["reviews", ":id"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rating\": 4,\n  \"comment\": \"Updated comment\"\n}"
+            },
+            "description": "Requires Bearer token. Only the review author or staff/admin can update. All fields optional."
+          }
+        },
+        {
+          "name": "Delete Review",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{base_url}}/reviews/:id", "host": ["{{base_url}}"], "path": ["reviews", ":id"] },
+            "description": "Requires Bearer token. Only the review author or staff/admin can delete."
+          }
+        }
+      ]
     }
   ]
 }

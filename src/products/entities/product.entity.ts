@@ -7,8 +7,10 @@ import {
   type Relation,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToMany,
 } from 'typeorm';
 import { CategoryEntity } from '../../categories/entities/category.entity.js';
+import { ReviewEntity } from '../../reviews/entities/review.entity.js';
 
 @Entity('products')
 export class ProductEntity {
@@ -42,4 +44,7 @@ export class ProductEntity {
     eager: true,
   })
   category: Relation<CategoryEntity>;
+
+  @OneToMany(() => ReviewEntity, (review) => review.product)
+  reviews: Relation<ReviewEntity[]>;
 }

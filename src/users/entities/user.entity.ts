@@ -2,11 +2,13 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  Index,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
+  type Relation,
 } from 'typeorm';
 import { Exclude } from 'class-transformer';
+import { ReviewEntity } from '../../reviews/entities/review.entity.js';
 
 export enum UserRole {
   USER = 'user',
@@ -46,4 +48,7 @@ export class UserEntity {
 
   @UpdateDateColumn({ type: 'timestamptz' })
   updatedAt: Date;
+
+  @OneToMany(() => ReviewEntity, (review) => review.user)
+  reviews: Relation<ReviewEntity[]>;
 }

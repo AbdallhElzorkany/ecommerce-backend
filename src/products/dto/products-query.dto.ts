@@ -3,6 +3,7 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  IsUUID,
   Max,
   Min,
 } from 'class-validator';
@@ -16,7 +17,7 @@ export class ProductsQueryDto {
 
   @ApiProperty({ required: false, description: 'Filter by category ID' })
   @IsOptional()
-  @IsString()
+  @IsUUID()
   categoryId?: string;
 
   @ApiProperty({

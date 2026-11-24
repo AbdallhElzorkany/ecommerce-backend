@@ -7,6 +7,7 @@ import { ConfigService } from '@nestjs/config';
 import { UsersPolicy } from '../users/users.policy.js';
 import { CategoriesPolicy } from '../categories/categories.policy.js';
 import { ProductsPolicy } from '../products/products.policy.js';
+import { ReviewsPolicy } from '../reviews/reviews.policy.js';
 
 export const AuthenticationModuleOptions: AuthenticationModuleAsyncOptions = {
   inject: [ConfigService],
@@ -28,5 +29,5 @@ export const AuthenticationModuleOptions: AuthenticationModuleAsyncOptions = {
 };
 
 export const authorizationModuleOptions: AuthorizationModuleAsyncOptions = {
-  policies: [UsersPolicy, CategoriesPolicy,ProductsPolicy],
+  policies: [UsersPolicy, CategoriesPolicy, ProductsPolicy, ReviewsPolicy],
 };
