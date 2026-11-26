@@ -22,14 +22,14 @@ export class ProductsQueryDto {
 
   @ApiProperty({
     required: false,
-    enum: ['name', 'price', 'stock', 'createdAt', 'updatedAt'],
+    enum: ['name', 'price', 'rating', 'reviewCount', 'stock', 'createdAt', 'updatedAt'],
     description: 'Sort by field',
     default: 'name',
   })
   @IsOptional()
   @IsString()
-  @IsIn(['name', 'price', 'stock', 'createdAt', 'updatedAt'])
-  sortBy?: 'name' | 'price' | 'stock' | 'createdAt' | 'updatedAt';
+  @IsIn(['name', 'price', 'rating', 'reviewCount', 'stock', 'createdAt', 'updatedAt'])
+  sortBy?: 'name' | 'price' | 'rating' | 'reviewCount' | 'stock' | 'createdAt' | 'updatedAt';
 
   @ApiProperty({
     required: false,

@@ -5,7 +5,12 @@ import {
 } from '@nestjs/common';
 import { CreateReviewDto } from './dto/create-review.dto.js';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, QueryFailedError, FindManyOptions } from 'typeorm';
+import {
+  Repository,
+  QueryFailedError,
+  FindManyOptions,
+  DataSource,
+} from 'typeorm';
 import { ProductsService } from '../products/products.service.js';
 import { ReviewEntity } from './entities/review.entity.js';
 import { UserEntity } from '../users/entities/user.entity.js';
@@ -13,6 +18,9 @@ import { ReviewsQueryDto } from './dto/reviews-query.dto.js';
 import { UpdateReviewDto } from './dto/update-review.dto.js';
 import { AuthorizationService } from '@nestjs/authorization';
 import { ReviewsPolicy } from './reviews.policy.js';
+import { ProductEntity } from '../products/entities/product.entity.js';
+import { ReviewResponseDto } from './dto/review-response.dto.js';
+import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class ReviewsService {
@@ -21,6 +29,7 @@ export class ReviewsService {
     private readonly reviewsRepository: Repository<ReviewEntity>,
     private readonly productsService: ProductsService,
     private readonly authorizationService: AuthorizationService,
+    private readonly dataSource: DataSource,
   ) {}
   /**
    * Creates a new review
@@ -37,10 +46,13 @@ export class ReviewsService {
         product,
         user,
       });
-      const { product: _, ...savedReview } =
-        await this.reviewsRepository.save(review);
-      await this.recalculateRating(productId);
-      return savedReview;
+      const saved = await this.reviewsRepository.save(review);
+      const { rating, reviewCount } = await this.recalculateRating(productId);
+      return {
+        review: this.toResponse(saved),
+        rating,
+        reviewCount,
+      };
     } catch (error) {
       if (
         error instanceof QueryFailedError &&
@@ -66,6 +78,7 @@ export class ReviewsService {
       productId,
       userId,
     } = query;
+
     const options: FindManyOptions<ReviewEntity> = {
       order: {
         [sortBy]: sortOrder,
@@ -77,15 +90,17 @@ export class ReviewsService {
       skip: (page - 1) * limit,
       take: limit,
     };
+
     const reviews = await this.reviewsRepository.find(options);
     const total = await this.reviewsRepository.count({
       where: options.where,
     });
+
     return {
       total,
       page,
       totalPages: Math.ceil(total / limit),
-      reviews,
+      reviews: this.toResponse(reviews),
     };
   }
 
@@ -96,6 +111,10 @@ export class ReviewsService {
    * @throws NotFoundException if the review is not found
    */
   public async findOne(id: string) {
+    return this.toResponse(await this.findEntity(id));
+  }
+
+  private async findEntity(id: string) {
     const review = await this.reviewsRepository.findOne({
       where: { id },
       relations: { user: true, product: true },
@@ -104,6 +123,12 @@ export class ReviewsService {
       throw new NotFoundException('Review not found');
     }
     return review;
+  }
+
+  private toResponse(payload: ReviewEntity | ReviewEntity[]) {
+    return plainToInstance(ReviewResponseDto, payload, {
+      excludeExtraneousValues: true,
+    });
   }
 
   /**
@@ -120,21 +145,34 @@ export class ReviewsService {
     id: string,
     updateReviewDto: UpdateReviewDto,
   ) {
-    const { comment, rating } = updateReviewDto;
-    const review = await this.findOne(id);
+    const review = await this.findEntity(id);
     await this.authorizationService.authorize(
       ReviewsPolicy,
       'update',
       user,
       review,
     );
-    const { product, ...updatedReview } = await this.reviewsRepository.save({
+    const updatedReview = await this.reviewsRepository.save({
       ...review,
-      comment: comment ?? review.comment,
-      rating: rating ?? review.rating,
+      comment: updateReviewDto.comment ?? review.comment,
+      rating: updateReviewDto.rating ?? review.rating,
     });
-    if (rating !== undefined) await this.recalculateRating(product.id);
-    return updatedReview;
+
+    if (updateReviewDto.rating !== undefined) {
+      const { rating, reviewCount } = await this.recalculateRating(
+        review.product.id,
+      );
+      return {
+        review: this.toResponse(updatedReview),
+        rating,
+        reviewCount,
+      };
+    }
+    return {
+      review: this.toResponse(updatedReview),
+      rating: updatedReview.product.rating,
+      reviewCount: updatedReview.product.reviewCount,
+    };
   }
 
   /**
@@ -145,16 +183,22 @@ export class ReviewsService {
    * @throws InternalServerErrorException if the review could not be removed
    */
   public async remove(user: UserEntity, id: string) {
-    const review = await this.findOne(id);
+    const review = await this.findEntity(id);
     await this.authorizationService.authorize(
       ReviewsPolicy,
       'delete',
       user,
       review,
     );
-    const { product, ...result } = await this.reviewsRepository.remove(review);
-    await this.recalculateRating(product.id);
-    return result;
+    await this.reviewsRepository.remove(review);
+    const { rating, reviewCount } = await this.recalculateRating(
+      review.product.id,
+    );
+    return {
+      message: 'Review has been removed successfully',
+      rating,
+      reviewCount,
+    };
   }
 
   /**
@@ -162,16 +206,29 @@ export class ReviewsService {
    * @param productId The ID of the product to recalculate the rating for
    */
   private async recalculateRating(productId: string) {
-    const { avg, count } = await this.reviewsRepository
-      .createQueryBuilder('r')
-      .select('AVG(r.rating)', 'avg')
-      .addSelect('COUNT(*)', 'count')
-      .where('r.productId = :productId', { productId })
-      .getRawOne();
+    return await this.dataSource.transaction(async (manager) => {
+      await manager
+        .createQueryBuilder()
+        .select('p.id')
+        .from(ProductEntity, 'p')
+        .setLock('pessimistic_write')
+        .where('p.id = :id', { id: productId })
+        .getOne();
+      const { avg, count } = await manager
+        .createQueryBuilder(ReviewEntity, 'r')
+        .select('AVG(r.rating)', 'avg')
+        .addSelect('COUNT(*)', 'count')
+        .where('r.productId = :productId', { productId })
+        .getRawOne();
 
-    await this.productsService.updateRating(productId, {
-      rating: Number(avg) || 0,
-      reviewCount: Number(count),
+      const rating = Number(avg) || 0;
+      const reviewCount = Number(count);
+
+      await manager.update(ProductEntity, productId, {
+        rating,
+        reviewCount,
+      });
+      return { rating, reviewCount };
     });
   }
 }

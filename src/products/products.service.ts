@@ -156,19 +156,4 @@ export class ProductsService {
     }
     return product;
   }
-
-  /**
-   * Updates the rating and review count of a product
-   * @param id The ID of the product to update
-   * @param data The data for the updated product
-   * @returns The updated product
-   * @throws NotFoundException if the product is not found
-   * @throws InternalServerErrorException if the product could not be updated
-   */
-  public async updateRating(
-    id: string,
-    data: { rating: number; reviewCount: number },
-  ) {
-    await this.productsRepository.update(id, data);
-  }
 }
