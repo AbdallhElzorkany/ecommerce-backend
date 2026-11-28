@@ -17,6 +17,7 @@ import { MailOptions } from './config/mail.config.js';
 import { CategoriesModule } from './categories/categories.module.js';
 import { ProductsModule } from './products/products.module.js';
 import { ReviewsModule } from './reviews/reviews.module.js';
+import { CartModule } from './cart/cart.module.js';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -35,6 +36,7 @@ import { ReviewsModule } from './reviews/reviews.module.js';
     CategoriesModule,
     ProductsModule,
     ReviewsModule,
+    CartModule,
   ],
   controllers: [],
   providers: [

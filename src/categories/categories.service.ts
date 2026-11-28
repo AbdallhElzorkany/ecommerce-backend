@@ -26,7 +26,7 @@ export class CategoriesService {
         error instanceof QueryFailedError &&
         (error as any).code === '23505' // unique_violation
       ) {
-        throw new ConflictException('Category already exists');
+        throw new ConflictException('Category with this slug already exists');
       }
       throw error;
     }

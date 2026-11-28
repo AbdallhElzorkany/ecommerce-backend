@@ -46,11 +46,8 @@ export class ProductEntity {
   @UpdateDateColumn({ type: 'timestamptz' })
   updatedAt: Date;
 
-  @ManyToOne(() => CategoryEntity, (category) => category.products, {
+  @ManyToOne(() => CategoryEntity, {
     eager: true,
   })
   category: Relation<CategoryEntity>;
-
-  @OneToMany(() => ReviewEntity, (review) => review.product)
-  reviews: Relation<ReviewEntity[]>;
 }

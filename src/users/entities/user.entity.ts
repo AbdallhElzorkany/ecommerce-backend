@@ -48,7 +48,4 @@ export class UserEntity {
 
   @UpdateDateColumn({ type: 'timestamptz' })
   updatedAt: Date;
-
-  @OneToMany(() => ReviewEntity, (review) => review.user)
-  reviews: Relation<ReviewEntity[]>;
 }

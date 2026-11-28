@@ -31,10 +31,10 @@ export class ReviewEntity {
   @UpdateDateColumn({ type: 'timestamptz' })
   updatedAt: Date;
 
-  @ManyToOne(() => UserEntity, (user) => user.reviews, { eager: true })
+  @ManyToOne(() => UserEntity, { eager: true })
   user: Relation<UserEntity>;
 
-  @ManyToOne(() => ProductEntity, (product) => product.reviews, {
+  @ManyToOne(() => ProductEntity, {
     onDelete: 'CASCADE',
   })
   product: Relation<ProductEntity>;

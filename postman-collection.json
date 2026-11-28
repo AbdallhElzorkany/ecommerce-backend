@@ -57,7 +57,28 @@
               "mode": "raw",
               "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"StrongPass1!\"\n}"
             },
-            "description": "Returns access + refresh tokens. Copy tokens into collection variables."
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "type": "text/javascript",
+                  "exec": [
+                    "const body = pm.response.json();",
+                    "",
+                    "pm.test('Login returns tokens', function () {",
+                    "    pm.expect(body.tokens && body.tokens.accessToken).to.be.a('string');",
+                    "    pm.expect(body.tokens && body.tokens.refreshToken).to.be.a('string');",
+                    "});",
+                    "",
+                    "if (body.tokens) {",
+                    "    pm.collectionVariables.set('access_token', body.tokens.accessToken);",
+                    "    pm.collectionVariables.set('refresh_token', body.tokens.refreshToken);",
+                    "}"
+                  ]
+                }
+              }
+            ],
+            "description": "Returns access + refresh tokens and saves them to collection variables."
           }
         },
         {
@@ -83,7 +104,31 @@
             "body": {
               "mode": "raw",
               "raw": "{\n  \"refreshToken\": \"{{refresh_token}}\"\n}"
-            }
+            },
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "type": "text/javascript",
+                  "exec": [
+                    "const body = pm.response.json();",
+                    "",
+                    "pm.test('Refresh returns tokens', function () {",
+                    "    pm.expect(body.accessToken).to.be.a('string');",
+                    "    pm.expect(body.refreshToken).to.be.a('string');",
+                    "});",
+                    "",
+                    "if (body.accessToken) {",
+                    "    pm.collectionVariables.set('access_token', body.accessToken);",
+                    "}",
+                    "if (body.refreshToken) {",
+                    "    pm.collectionVariables.set('refresh_token', body.refreshToken);",
+                    "}"
+                  ]
+                }
+              }
+            ],
+            "description": "Exchanges the refresh token for a new access + refresh token pair and saves them to collection variables."
           }
         },
         {
@@ -139,7 +184,7 @@
       "name": "Categories",
       "item": [
         {
-          "name": "Create Category (admin)",
+          "name": "Create Category (staff/admin)",
           "request": {
             "method": "POST",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
@@ -153,6 +198,7 @@
         {
           "name": "List Categories",
           "request": {
+            "auth": { "type": "noauth" },
             "method": "GET",
             "url": {
               "raw": "{{base_url}}/categories?search=&sortBy=name&sortOrder=ASC&page=1&limit=10",
@@ -171,6 +217,7 @@
         {
           "name": "Get Category By Slug",
           "request": {
+            "auth": { "type": "noauth" },
             "method": "GET",
             "url": { "raw": "{{base_url}}/categories/slug/:slug", "host": ["{{base_url}}"], "path": ["categories", "slug", ":slug"] },
             "description": "Public. Returns the category matching the slug."
@@ -179,12 +226,13 @@
         {
           "name": "Get Category",
           "request": {
+            "auth": { "type": "noauth" },
             "method": "GET",
             "url": { "raw": "{{base_url}}/categories/:id", "host": ["{{base_url}}"], "path": ["categories", ":id"] }
           }
         },
         {
-          "name": "Update Category (admin)",
+          "name": "Update Category (staff/admin)",
           "request": {
             "method": "PATCH",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
@@ -208,7 +256,7 @@
       "name": "Products",
       "item": [
         {
-          "name": "Create Product (admin)",
+          "name": "Create Product (staff/admin)",
           "request": {
             "method": "POST",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
@@ -217,31 +265,32 @@
               "mode": "raw",
               "raw": "{\n  \"name\": \"Wireless Mouse\",\n  \"slug\": \"wireless-mouse\",\n  \"description\": \"Ergonomic wireless mouse with USB receiver\",\n  \"price\": 29.99,\n  \"stock\": 100,\n  \"categoryId\": \"<category-id>\"\n}"
             },
-            "description": "Requires admin permission. name 3-255 chars, description 3-1000, price >= 0, stock integer >= 0."
+            "description": "Requires staff/admin permission. name 3-255 chars, description 3-1000, price >= 0, stock integer >= 0."
           }
         },
         {
           "name": "List Products",
           "request": {
+            "auth": { "type": "noauth" },
             "method": "GET",
             "url": {
-              "raw": "{{base_url}}/products?search=&categoryId=&sortBy=name&sortOrder=ASC&page=1&limit=10",
+              "raw": "{{base_url}}/products?sortBy=name&sortOrder=ASC&page=1&limit=10",
               "host": ["{{base_url}}"],
               "path": ["products"],
               "query": [
-                { "key": "search", "value": "", "description": "Search by name" },
-                { "key": "categoryId", "value": "", "description": "Filter by category ID" },
-                { "key": "sortBy", "value": "name", "description": "name | price | stock | createdAt | updatedAt" },
+                { "key": "sortBy", "value": "name", "description": "name | price | rating | reviewCount | stock | createdAt | updatedAt" },
                 { "key": "sortOrder", "value": "ASC", "description": "ASC | DESC" },
                 { "key": "page", "value": "1" },
                 { "key": "limit", "value": "10", "description": "1-100" }
               ]
-            }
+            },
+            "description": "Public. Optional filters: search (name contains), categoryId (UUID)."
           }
         },
         {
           "name": "Get Product By Slug",
           "request": {
+            "auth": { "type": "noauth" },
             "method": "GET",
             "url": { "raw": "{{base_url}}/products/slug/:slug", "host": ["{{base_url}}"], "path": ["products", "slug", ":slug"] },
             "description": "Public. Returns the product matching the slug."
@@ -250,12 +299,13 @@
         {
           "name": "Get Product",
           "request": {
+            "auth": { "type": "noauth" },
             "method": "GET",
             "url": { "raw": "{{base_url}}/products/:id", "host": ["{{base_url}}"], "path": ["products", ":id"] }
           }
         },
         {
-          "name": "Update Product (admin)",
+          "name": "Update Product (staff/admin)",
           "request": {
             "method": "PATCH",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
@@ -272,6 +322,61 @@
           "request": {
             "method": "DELETE",
             "url": { "raw": "{{base_url}}/products/:id", "host": ["{{base_url}}"], "path": ["products", ":id"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cart",
+      "item": [
+        {
+          "name": "Get My Cart",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/cart", "host": ["{{base_url}}"], "path": ["cart"] },
+            "description": "Requires Bearer token. Returns the current user's cart, creating an empty cart if needed."
+          }
+        },
+        {
+          "name": "Add To Cart",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/cart", "host": ["{{base_url}}"], "path": ["cart"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": \"<product-id>\"\n}"
+            },
+            "description": "Requires Bearer token. Adds one unit of the product, or increments the quantity if it is already in the cart. productId must be a UUID."
+          }
+        },
+        {
+          "name": "Update Cart Item",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/cart", "host": ["{{base_url}}"], "path": ["cart"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"itemId\": \"<cart-item-id>\",\n  \"quantity\": 2\n}"
+            },
+            "description": "Requires Bearer token. itemId is the cart item UUID, not the product ID. quantity must be >= 1 and <= product stock."
+          }
+        },
+        {
+          "name": "Remove Cart Item",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{base_url}}/cart/:itemId", "host": ["{{base_url}}"], "path": ["cart", ":itemId"] },
+            "description": "Requires Bearer token. itemId is the cart item UUID, not the product ID."
+          }
+        },
+        {
+          "name": "Clear Cart",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{base_url}}/cart", "host": ["{{base_url}}"], "path": ["cart"] },
+            "description": "Requires Bearer token. Removes all items from the current user's cart. Returns 400 if the cart is already empty."
           }
         }
       ]
@@ -367,25 +472,26 @@
         {
           "name": "List Reviews",
           "request": {
+            "auth": { "type": "noauth" },
             "method": "GET",
             "url": {
-              "raw": "{{base_url}}/reviews?productId=&userId=&sortBy=createdAt&sortOrder=DESC&page=1&limit=10",
+              "raw": "{{base_url}}/reviews?sortBy=createdAt&sortOrder=DESC&page=1&limit=10",
               "host": ["{{base_url}}"],
               "path": ["reviews"],
               "query": [
-                { "key": "productId", "value": "", "description": "Filter by product ID" },
-                { "key": "userId", "value": "", "description": "Filter by user ID" },
                 { "key": "sortBy", "value": "createdAt", "description": "rating | createdAt | updatedAt" },
                 { "key": "sortOrder", "value": "DESC", "description": "ASC | DESC" },
                 { "key": "page", "value": "1" },
                 { "key": "limit", "value": "10", "description": "1-100" }
               ]
-            }
+            },
+            "description": "Public. Optional filters: productId (UUID), userId (UUID)."
           }
         },
         {
           "name": "Get Review",
           "request": {
+            "auth": { "type": "noauth" },
             "method": "GET",
             "url": { "raw": "{{base_url}}/reviews/:id", "host": ["{{base_url}}"], "path": ["reviews", ":id"] }
           }

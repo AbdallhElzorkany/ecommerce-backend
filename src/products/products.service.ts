@@ -37,7 +37,7 @@ export class ProductsService {
         error instanceof QueryFailedError &&
         (error as any).code === '23505' // unique_violation
       ) {
-        throw new ConflictException('product already exists');
+        throw new ConflictException('product with this slug already exists');
       }
       throw error;
     }
