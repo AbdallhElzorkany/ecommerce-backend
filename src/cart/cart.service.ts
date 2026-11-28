@@ -22,7 +22,11 @@ export class CartService {
     private readonly cartItemsRepository: Repository<CartItemEntity>,
     private readonly productsService: ProductsService,
   ) {}
-
+  /**
+   * Finds or creates a cart for the given user
+   * @param user The user entity
+   * @returns The cart entity
+   */
   public async findOrCreateCart(user: UserEntity) {
     const cart = await this.cartsRepository.findOne({
       where: { user: { id: user.id } },
@@ -36,6 +40,12 @@ export class CartService {
     return cart;
   }
 
+  /**
+   * Adds a product to the user's cart
+   * @param User The user entity
+   * @param productId The product ID to add
+   * @returns The updated cart
+   */
   public async addToCart(User: UserEntity, { productId }: AddToCartDto) {
     const product = await this.productsService.findOne(productId);
     const cart = await this.findOrCreateCart(User);
@@ -74,6 +84,12 @@ export class CartService {
     return updatedCartItem;
   }
 
+  /**
+   * Removes an item from the user's cart
+   * @param User The user entity
+   * @param itemId The item ID to remove
+   * @returns The updated cart
+   */
   public async removeFromCart(User: UserEntity, itemId: string) {
     const cart = await this.findCart(User);
     const item = await this.cartItemsRepository.findOne({
@@ -90,6 +106,13 @@ export class CartService {
     return updatedCartItem;
   }
 
+  /**
+   * Updates the quantity of an item in the user's cart
+   * @param User The user entity
+   * @param itemId The item ID to update
+   * @param quantity The new quantity
+   * @returns The updated cart
+   */
   public async updateCart(
     User: UserEntity,
     { itemId, quantity }: UpdateCartDto,
@@ -118,6 +141,11 @@ export class CartService {
     return updatedCartItem;
   }
 
+  /**
+   * Clears all items from the user's cart
+   * @param User The user entity
+   * @returns The updated cart
+   */
   public async clearCart(User: UserEntity) {
     const cart = await this.findCart(User);
     if (cart.items.length === 0) {
@@ -133,6 +161,11 @@ export class CartService {
     return updatedCartItem;
   }
 
+  /**
+   * Finds the user's cart
+   * @param user The user entity
+   * @returns The cart
+   */
   public async findCart(user: UserEntity) {
     const cart = await this.cartsRepository.findOne({
       where: { user: { id: user.id } },
